@@ -7,11 +7,15 @@ import { processResume } from './PostProcessor';
 import { getRelevantNodes, formatDossierBlock } from './HybridSearchEngine';
 import { assemblePromptContext, PromptAssemblyResult } from './ContextAssembler';
 import { classifyIntent, needsCompanyResearch } from './IntentClassifier';
-import { CompanyResearchEngine } from './CompanyResearchEngine';
+import { CompanyResearchEngine, jdContextFromStructured } from './CompanyResearchEngine';
+import { TechnicalDepthScorer } from './TechnicalDepthScorer';
+import { AOTPipeline } from './AOTPipeline';
+import { generateStarStories, generateStarStoryNodes } from './StarStoryGenerator';
 
 export class KnowledgeOrchestrator {
     private db: KnowledgeDatabaseManager;
     private knowledgeModeActive: boolean = false;
+    private depthScorer: TechnicalDepthScorer;
 
     // Cached state for fast retrieval
     private activeResume: KnowledgeDocument | null = null;
@@ -29,6 +33,7 @@ export class KnowledgeOrchestrator {
         this.db = db;
         this.db.initializeSchema();
         this.companyResearch = new CompanyResearchEngine(db);
+        this.depthScorer = new TechnicalDepthScorer();
         this.refreshCache();
     }
 
@@ -91,8 +96,8 @@ export class KnowledgeOrchestrator {
             try {
                 const structured = this.activeJD!.structured_data as StructuredJD;
                 jdSummary = {
-                    title: structured.title,
-                    company: structured.company
+                    title: structured.title || (structured as any).role || 'Unknown Title',
+                    company: structured.company || 'Unknown Company'
                 };
             } catch { /* ignore */ }
         }
@@ -146,8 +151,32 @@ export class KnowledgeOrchestrator {
             // 7. Save Nodes
             this.db.saveNodes(nodesWithEmbeddings, docId);
 
+            // 8. Generate STAR Stories (Resume Only)
+            if (type === DocType.RESUME) {
+                try {
+                    console.log(`[KnowledgeOrchestrator] Generating STAR stories for resume...`);
+                    const starNodes = await generateStarStoryNodes(structuredData as StructuredResume, this.generateContentFn, this.embedFn);
+                    this.db.saveNodes(starNodes, docId);
+                } catch (err: any) {
+                    console.error('[KnowledgeOrchestrator] Failed to generate STAR stories:', err.message);
+                }
+            }
+
             this.refreshCache();
             console.log(`[KnowledgeOrchestrator] ✅ Ingestion complete for ${type}`);
+
+            // 9. Fire AOT Pipeline (JD Only)
+            if (type === DocType.JD) {
+                const aot = new AOTPipeline(this.db, this.companyResearch);
+                if (this.generateContentFn) {
+                    aot.setGenerateContentFn(this.generateContentFn);
+                }
+                aot.runForJD(
+                    this.db.getDocumentByType(DocType.JD)!,
+                    this.db.getDocumentByType(DocType.RESUME)
+                ).catch((err: Error) => console.error('[KnowledgeOrchestrator] AOT Pipeline failed:', err));
+            }
+
             return { success: true };
 
         } catch (error: any) {
@@ -197,7 +226,7 @@ export class KnowledgeOrchestrator {
             if (jd.company) {
                 try {
                     const dossier = await this.companyResearch.researchCompany(
-                        jd.company, jd.title, jd.location
+                        jd.company, jdContextFromStructured(jd)
                     );
                     dossierContext = formatDossierBlock(dossier);
                 } catch (error: any) {
@@ -294,9 +323,9 @@ Keywords: ${jd.keywords?.join(', ')}`;
             if (this.activeJD) {
                 const jd = this.activeJD.structured_data as StructuredJD;
                 jdData = {
-                    title: jd.title,
-                    company: jd.company,
-                    location: jd.location,
+                    title: jd.title || (jd as any).role || 'Unknown Title',
+                    company: jd.company || 'Unknown Company',
+                    location: jd.location || 'Unknown Location',
                     level: jd.level,
                     requirements: jd.requirements,
                     technologies: jd.technologies,
@@ -331,6 +360,35 @@ Keywords: ${jd.keywords?.join(', ')}`;
         } catch {
             return null;
         }
+    }
+
+    /**
+     * Feed an interviewer's STT transcript to the technical depth scorer.
+     */
+    feedInterviewerUtterance(text: string): void {
+        this.depthScorer.addUtterance(text);
+    }
+
+    /**
+     * Get extracted vocabulary for STT hints, filtering out long sentences.
+     */
+    getVocabularyHints(): string[] {
+        const hints = new Set<string>();
+        if (this.activeJD) {
+            const jd = this.activeJD.structured_data as StructuredJD;
+            if (jd.company) hints.add(jd.company);
+            if (jd.title) hints.add(jd.title);
+            jd.technologies?.forEach(t => hints.add(t));
+            jd.keywords?.forEach(k => hints.add(k));
+
+            // Only include short, keyword-like entries for STT hints
+            for (const req of (jd.requirements || [])) {
+                if (req.trim().split(/\s+/).length <= 3) {
+                    hints.add(req.trim());
+                }
+            }
+        }
+        return Array.from(hints);
     }
 }
 

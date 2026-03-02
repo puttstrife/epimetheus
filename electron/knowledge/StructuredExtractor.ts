@@ -158,10 +158,20 @@ export async function extractStructuredData<T>(
       console.log(`[StructuredExtractor] Successfully parsed resume for: ${resume.identity.name}`);
     } else if (type === DocType.JD) {
       const jd = parsed as unknown as StructuredJD;
-      if (!jd.title) {
-        throw new Error('Parsed JD missing title');
+
+      // Fallback for LLMs that output 'role' instead of 'title'
+      if (!jd.title && (jd as any).role) {
+        jd.title = (jd as any).role;
       }
+
+      if (!jd.title) {
+        console.warn('[StructuredExtractor] Parsed JD missing title/role. Providing fallback.');
+        jd.title = 'Unknown Role';
+      }
+
       // Set defaults
+      jd.company = jd.company || 'Unknown Company';
+      jd.location = jd.location || 'Unknown Location';
       jd.requirements = jd.requirements || [];
       jd.nice_to_haves = jd.nice_to_haves || [];
       jd.responsibilities = jd.responsibilities || [];

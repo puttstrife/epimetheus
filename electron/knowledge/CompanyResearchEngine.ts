@@ -1,7 +1,7 @@
 // electron/knowledge/CompanyResearchEngine.ts
 // Company research engine with pluggable web search, LLM summarization, and SQLite caching
 
-import { CompanyDossier, SalaryEstimate } from './types';
+import { CompanyDossier, SalaryEstimate, StructuredJD } from './types';
 import { KnowledgeDatabaseManager } from './KnowledgeDatabaseManager';
 
 // ============================================
@@ -16,6 +16,43 @@ export interface SearchResult {
 
 export interface SearchProvider {
     search(query: string, numResults?: number): Promise<SearchResult[]>;
+}
+
+/**
+ * JD context passed into research for richer, role-aware dossiers.
+ * Every field is optional so callers without a JD can still use the engine.
+ */
+export interface JDContext {
+    title?: string;           // e.g. "Technical Project Trainee"
+    location?: string;        // e.g. "Gurgaon"
+    level?: string;           // e.g. "entry", "senior"
+    employment_type?: string; // e.g. "full_time", "internship"
+    technologies?: string[];
+    requirements?: string[];
+    responsibilities?: string[];
+    keywords?: string[];
+    compensation_hint?: string;
+    min_years_experience?: number;
+    description_summary?: string;
+}
+
+/**
+ * Build a JDContext from a StructuredJD (convenience helper).
+ */
+export function jdContextFromStructured(jd: StructuredJD): JDContext {
+    return {
+        title: jd.title || (jd as any).role || 'Unknown Role',
+        location: jd.location || 'Unknown Location',
+        level: jd.level,
+        employment_type: jd.employment_type,
+        technologies: jd.technologies,
+        requirements: jd.requirements,
+        responsibilities: jd.responsibilities,
+        keywords: jd.keywords,
+        compensation_hint: jd.compensation_hint,
+        min_years_experience: jd.min_years_experience,
+        description_summary: jd.description_summary,
+    };
 }
 
 /**
@@ -65,6 +102,7 @@ const DOSSIER_SCHEMA = `{
   ],
   "competitors": [],
   "recent_news": "",
+  "core_values": [],
   "sources": []
 }`;
 
@@ -101,15 +139,15 @@ export class CompanyResearchEngine {
 
     /**
      * Research a company. Returns cached dossier if fresh, otherwise runs live research.
+     * Accepts a JDContext for richer, role-aware dossiers.
      */
     async researchCompany(
         companyName: string,
-        role?: string,
-        location?: string,
+        jdCtx: JDContext = {},
         forceRefresh: boolean = false
     ): Promise<CompanyDossier | null> {
         const normalizedName = companyName.toLowerCase().trim();
-        console.log(`[CompanyResearch] Researching: ${companyName} (role: ${role}, location: ${location})`);
+        console.log(`[CompanyResearch] Researching: ${companyName} (role: ${jdCtx.title}, location: ${jdCtx.location}, level: ${jdCtx.level})`);
 
         // Check cache
         if (!forceRefresh) {
@@ -123,7 +161,7 @@ export class CompanyResearchEngine {
         // If no search provider, return a minimal dossier with available data
         if (!this.searchProvider) {
             console.warn('[CompanyResearch] No search provider configured. Returning LLM-only dossier.');
-            return this.generateLLMOnlyDossier(companyName, role, location);
+            return this.generateLLMOnlyDossier(companyName, jdCtx);
         }
 
         // Rate limiting
@@ -134,7 +172,7 @@ export class CompanyResearchEngine {
 
         try {
             // Build search queries
-            const queries = this.buildSearchQueries(companyName, role, location);
+            const queries = this.buildSearchQueries(companyName, jdCtx);
             const allResults: SearchResult[] = [];
             const allUrls: string[] = [];
 
@@ -154,7 +192,7 @@ export class CompanyResearchEngine {
 
             if (allResults.length === 0) {
                 console.warn('[CompanyResearch] No search results found. Falling back to LLM-only.');
-                return this.generateLLMOnlyDossier(companyName, role, location);
+                return this.generateLLMOnlyDossier(companyName, jdCtx);
             }
 
             // Fetch page content for top results (limit to 6)
@@ -167,7 +205,7 @@ export class CompanyResearchEngine {
             }
 
             // Summarize with LLM
-            const dossier = await this.summarizeWithLLM(companyName, role, location, snippets);
+            const dossier = await this.summarizeWithLLM(companyName, jdCtx, snippets);
 
             if (dossier) {
                 // Cache the dossier
@@ -178,29 +216,72 @@ export class CompanyResearchEngine {
             return null;
         } catch (error: any) {
             console.error(`[CompanyResearch] Research failed for ${companyName}:`, error.message);
-            return this.generateLLMOnlyDossier(companyName, role, location);
+            return this.generateLLMOnlyDossier(companyName, jdCtx);
         }
     }
 
     /**
-     * Build targeted search queries for a company.
+     * Build targeted search queries for a company using full JD context.
      */
-    private buildSearchQueries(companyName: string, role?: string, location?: string): string[] {
+    private buildSearchQueries(companyName: string, jdCtx: JDContext): string[] {
+        const { title, location, technologies, level } = jdCtx;
+
         const queries = [
             `${companyName} hiring strategy careers`,
-            `${companyName} interview process ${role || ''}`.trim(),
+            `${companyName} interview process ${title || ''}`.trim(),
         ];
 
-        if (role && location) {
-            queries.push(`${companyName} ${role} salary ${location}`);
-        } else if (role) {
-            queries.push(`${companyName} ${role} salary`);
+        // Salary query — include role, location, and level if available
+        if (title && location) {
+            queries.push(`${companyName} ${title} salary ${location}`);
+        } else if (title) {
+            queries.push(`${companyName} ${title} salary`);
         }
 
         queries.push(`${companyName} recent funding news layoffs`);
         queries.push(`${companyName} competitors`);
+        queries.push(`${companyName} core values leadership principles culture`);
+
+        // Tech-stack specific query when technologies are known
+        if (technologies && technologies.length > 0) {
+            queries.push(`${companyName} tech stack ${technologies.slice(0, 3).join(' ')}`);
+        }
+
+        // Level-specific interview query (e.g. "intern interview", "senior interview")
+        if (level && title) {
+            queries.push(`${companyName} ${level} ${title} interview`);
+        }
 
         return queries;
+    }
+
+    /**
+     * Format a compact JD summary block for LLM context.
+     */
+    private formatJDContextBlock(jdCtx: JDContext): string {
+        const parts: string[] = [];
+        if (jdCtx.title) parts.push(`Role: ${jdCtx.title}`);
+        if (jdCtx.level) parts.push(`Level: ${jdCtx.level}`);
+        if (jdCtx.location) parts.push(`Location: ${jdCtx.location}`);
+        if (jdCtx.employment_type) parts.push(`Type: ${jdCtx.employment_type.replace('_', ' ')}`);
+        if (jdCtx.min_years_experience !== undefined && jdCtx.min_years_experience > 0) {
+            parts.push(`Min Experience: ${jdCtx.min_years_experience} years`);
+        }
+        if (jdCtx.compensation_hint) parts.push(`Compensation Hint: ${jdCtx.compensation_hint}`);
+        if (jdCtx.technologies && jdCtx.technologies.length > 0) {
+            parts.push(`Technologies: ${jdCtx.technologies.join(', ')}`);
+        }
+        if (jdCtx.requirements && jdCtx.requirements.length > 0) {
+            parts.push(`Key Requirements: ${jdCtx.requirements.slice(0, 5).join('; ')}`);
+        }
+        if (jdCtx.responsibilities && jdCtx.responsibilities.length > 0) {
+            parts.push(`Key Responsibilities: ${jdCtx.responsibilities.slice(0, 5).join('; ')}`);
+        }
+        if (jdCtx.keywords && jdCtx.keywords.length > 0) {
+            parts.push(`Keywords: ${jdCtx.keywords.join(', ')}`);
+        }
+        if (jdCtx.description_summary) parts.push(`Summary: ${jdCtx.description_summary}`);
+        return parts.join('\n');
     }
 
     /**
@@ -208,21 +289,24 @@ export class CompanyResearchEngine {
      */
     private async summarizeWithLLM(
         companyName: string,
-        role: string | undefined,
-        location: string | undefined,
+        jdCtx: JDContext,
         snippets: { url: string; text: string }[]
     ): Promise<CompanyDossier | null> {
         if (!this.generateContentFn) return null;
 
         const snippetText = snippets.map(s => `[Source: ${s.url}]\n${s.text}`).join('\n\n---\n\n');
+        const jdBlock = this.formatJDContextBlock(jdCtx);
 
-        const prompt = `You are a web research assistant. Using the following web snippets, create a structured company dossier JSON for ${companyName}${role ? ` focusing on the ${role} role` : ''}${location ? ` in ${location}` : ''}.
+        const prompt = `You are a web research assistant. Using the following web snippets, create a structured company dossier JSON for ${companyName}.
 
+${jdBlock ? `The candidate is applying for the following position — tailor salary estimates, interview focus, and hiring strategy to this specific role:\n${jdBlock}\n` : ''}
 Match this exact JSON schema:
 ${DOSSIER_SCHEMA}
 
 Rules:
 - For each salary estimate, include a source URL and confidence level (low/medium/high).
+- Tailor salary estimates to the specific role, level, and location from the JD context above.
+- For interview_focus, consider the specific technologies, requirements, and responsibilities listed.
 - If information is not available, use empty strings or empty arrays.
 - Do NOT fabricate data. Only use information from the snippets.
 - Return JSON only. No markdown fences.
@@ -239,6 +323,7 @@ ${snippetText}`;
 
             const dossier = JSON.parse(cleaned.trim()) as CompanyDossier;
             dossier.fetched_at = new Date().toISOString();
+            dossier.core_values = dossier.core_values || [];
             dossier.sources = [...new Set([...(dossier.sources || []), ...snippets.map(s => s.url)])];
 
             console.log(`[CompanyResearch] Dossier generated for ${companyName} with ${dossier.sources.length} sources`);
@@ -254,20 +339,22 @@ ${snippetText}`;
      */
     private async generateLLMOnlyDossier(
         companyName: string,
-        role?: string,
-        location?: string
+        jdCtx: JDContext = {}
     ): Promise<CompanyDossier | null> {
         if (!this.generateContentFn) return null;
 
-        const prompt = `Based on your general knowledge, provide a brief company dossier for ${companyName}${role ? ` for the role of ${role}` : ''}${location ? ` in ${location}` : ''}.
+        const jdBlock = this.formatJDContextBlock(jdCtx);
 
+        const prompt = `Based on your general knowledge, provide a brief company dossier for ${companyName}.
+
+${jdBlock ? `The candidate is applying for the following position — tailor salary estimates, interview focus, and hiring strategy to this specific role:\n${jdBlock}\n` : ''}
 Match this exact JSON schema:
 ${DOSSIER_SCHEMA}
 
 Rules:
 - Mark ALL confidence levels as "low" since this is from general knowledge, not live data.
 - Use empty string for source URLs.
-- Be conservative with salary estimates.
+- Be conservative with salary estimates but tailor them to the role, level, and location.
 - Return JSON only. No markdown fences.`;
 
         try {
@@ -279,6 +366,7 @@ Rules:
 
             const dossier = JSON.parse(cleaned.trim()) as CompanyDossier;
             dossier.fetched_at = new Date().toISOString();
+            dossier.core_values = dossier.core_values || [];
             dossier.sources = [];
 
             // Cache even LLM-only dossiers (shorter TTL could be set)
