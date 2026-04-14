@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Epimetheus — Documentation</title>
+  <style>
+    :root {
+      --bg: #0e0e0e;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --accent: #f97316;
+      --accent-dim: #7c3a0f;
+      --text: #e5e5e5;
+      --muted: #888;
+      --code-bg: #1a1a1a;
+      --green: #4ade80;
+      --red: #f87171;
+      --yellow: #facc15;
+      --blue: #60a5fa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Layout */
+    .layout { display: flex; min-height: 100vh; }
+    nav {
+      width: 260px;
+      min-width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 32px 20px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    main {
+      flex: 1;
+      padding: 48px 56px;
+      max-width: 900px;
+    }
+
+    /* Nav */
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 32px;
+      display: block;
+    }
+    .nav-section {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin: 20px 0 8px;
+    }
+    nav ul { list-style: none; }
+    nav ul li a {
+      display: block;
+      padding: 5px 10px;
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      transition: background .15s;
+    }
+    nav ul li a:hover { background: var(--border); text-decoration: none; }
+
+    /* Content */
+    h1 { font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+    h2 { font-size: 22px; font-weight: 600; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 17px; font-weight: 600; margin: 28px 0 10px; color: var(--accent); }
+    h4 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; }
+    p { margin-bottom: 14px; }
+    ul, ol { padding-left: 20px; margin-bottom: 14px; }
+    li { margin-bottom: 6px; }
+    strong { color: #fff; }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #1a0a00 0%, #0e0e0e 60%);
+      border: 1px solid var(--accent-dim);
+      border-radius: 12px;
+      padding: 36px 40px;
+      margin-bottom: 40px;
+    }
+    .hero .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      margin-top: 8px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 6px;
+      margin-top: 12px;
+    }
+    .badge-orange { background: #7c2d12; color: #fdba74; }
+    .badge-green { background: #14532d; color: #86efac; }
+    .badge-blue { background: #1e3a5f; color: #93c5fd; }
+
+    /* Code */
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      color: #fdba74;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 13px;
+      color: #e5e5e5;
+    }
+    .comment { color: var(--muted); }
+    .key { color: #86efac; }
+    .val { color: #fdba74; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; }
+    th { text-align: left; padding: 10px 14px; background: var(--surface); font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Cards */
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 20px 0; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .card-icon { font-size: 24px; margin-bottom: 10px; }
+    .card-title { font-weight: 600; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+
+    /* Pipeline */
+    .pipeline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .pipe-step {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .pipe-step.highlight { border-color: var(--accent); color: var(--accent); }
+    .pipe-arrow { color: var(--muted); font-size: 18px; }
+
+    /* Phase roadmap */
+    .phase {
+      border-left: 3px solid var(--border);
+      padding-left: 20px;
+      margin-bottom: 28px;
+      position: relative;
+    }
+    .phase.active { border-color: var(--accent); }
+    .phase-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .phase-current { background: var(--accent-dim); color: var(--accent); }
+    .phase-next { background: #1c2a1c; color: var(--green); }
+    .phase-future { background: #1a1a2e; color: var(--blue); }
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding: 4px 0; font-size: 14px; }
+    .checklist li::before { content: "☐ "; color: var(--muted); }
+    .checklist li.done::before { content: "✓ "; color: var(--green); }
+
+    /* Alert */
+    .alert {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .alert-warning { background: #2a1f00; border-left: 3px solid var(--yellow); }
+    .alert-info { background: #0f1f2e; border-left: 3px solid var(--blue); }
+    .alert-success { background: #0d1f14; border-left: 3px solid var(--green); }
+
+    /* Footer */
+    .footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar Nav -->
+  <nav>
+    <span class="nav-logo">⚡ Epimetheus</span>
+
+    <div class="nav-section">Overview</div>
+    <ul>
+      <li><a href="#what-is">What is Epimetheus</a></li>
+      <li><a href="#stack">Tech Stack</a></li>
+      <li><a href="#pipeline">How it Works</a></li>
+    </ul>
+
+    <div class="nav-section">Setup</div>
+    <ul>
+      <li><a href="#requirements">Requirements</a></li>
+      <li><a href="#env">Environment (.env)</a></li>
+      <li><a href="#install">Install & Run</a></li>
+      <li><a href="#api-keys">API Keys Guide</a></li>
+    </ul>
+
+    <div class="nav-section">Configuration</div>
+    <ul>
+      <li><a href="#stt">STT — ElevenLabs</a></li>
+      <li><a href="#llm">LLM — Groq</a></li>
+      <li><a href="#defaults">Defaults Applied</a></li>
+    </ul>
+
+    <div class="nav-section">Roadmap</div>
+    <ul>
+      <li><a href="#phase1">Phase 1 — Foundation</a></li>
+      <li><a href="#phase2">Phase 2 — Branding</a></li>
+      <li><a href="#phase3">Phase 3 — Features</a></li>
+      <li><a href="#phase4">Phase 4 — Integrations</a></li>
+      <li><a href="#phase5">Phase 5 — Advanced</a></li>
+    </ul>
+
+    <div class="nav-section">Reference</div>
+    <ul>
+      <li><a href="#cost">Cost Breakdown</a></li>
+      <li><a href="#vs-cluely">vs Cluely</a></li>
+      <li><a href="#license">License</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Epimetheus</h1>
+      <p class="subtitle">Free, open-source AI meeting copilot & interview assistant.<br>Forked from Natively · Powered by ElevenLabs STT + Groq LLM.</p>
+      <span class="badge badge-orange">AGPL-3.0</span>
+      <span class="badge badge-green">Free</span>
+      <span class="badge badge-blue">BYOK</span>
+      <span class="badge badge-orange">macOS arm64</span>
+    </div>
+
+    <!-- What is -->
+    <h2 id="what-is">What is Epimetheus?</h2>
+    <p>Epimetheus is a desktop AI copilot that listens to your meetings and interviews in real-time, transcribes everything, and surfaces AI-powered suggestions and summaries — all running locally with your own API keys.</p>
+    <p>It is a fork of <strong>Natively</strong> (the open-source Cluely alternative), renamed and customized for personal and professional use. No subscriptions. No data sent to third-party servers beyond your chosen API providers.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🎙</div>
+        <div class="card-title">Real-Time Transcription</div>
+        <div class="card-desc">ElevenLabs Scribe v2 Realtime — 150ms latency, 90+ languages, speaker diarization</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">AI Suggestions</div>
+        <div class="card-desc">Groq + Llama 3.3 70B — ~800 tokens/sec, near-instant coaching responses</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">Local RAG</div>
+        <div class="card-desc">SQLite + sqlite-vec for private, on-device knowledge retrieval</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔑</div>
+        <div class="card-title">BYOK</div>
+        <div class="card-desc">Bring your own API keys. No vendor lock-in, no platform fees</div>
+      </div>
+    </div>
+
+    <!-- Stack -->
+    <h2 id="stack">Tech Stack</h2>
+    <table>
+      <thead><tr><th>Layer</th><th>Technology</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Shell</strong></td><td>Electron 33</td><td>Cross-platform desktop wrapper</td></tr>
+        <tr><td><strong>UI</strong></td><td>React 18 + Tailwind + Radix UI</td><td>Component library, accessible primitives</td></tr>
+        <tr><td><strong>STT</strong></td><td>ElevenLabs Scribe v2 Realtime</td><td>Primary — WebSocket streaming</td></tr>
+        <tr><td><strong>LLM</strong></td><td>Groq (Llama 3.3 70B)</td><td>Default — fastest inference</td></tr>
+        <tr><td><strong>LLM (alt)</strong></td><td>Anthropic Claude, OpenAI, Gemini</td><td>Configurable via Settings</td></tr>
+        <tr><td><strong>Storage</strong></td><td>SQLite + sqlite-vec</td><td>Local RAG, meeting history</td></tr>
+        <tr><td><strong>Native</strong></td><td>Rust (native-module)</td><td>Low-level audio capture</td></tr>
+        <tr><td><strong>Build</strong></td><td>Vite + electron-builder</td><td>Fast HMR in dev, optimized prod bundles</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Pipeline -->
+    <h2 id="pipeline">How it Works</h2>
+    <p>Every session follows this pipeline:</p>
+    <div class="pipeline">
+      <div class="pipe-step">🎙 Mic / System Audio</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step highlight">ElevenLabs Scribe v2 RT</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">Transcript</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">Local RAG Context</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step highlight">Groq Llama 3.3 70B</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">Suggestions on Screen</div>
+    </div>
+    <ul>
+      <li><strong>Mic</strong> — captures your voice</li>
+      <li><strong>System Audio</strong> — captures the other party (Zoom, Meet, etc.)</li>
+      <li><strong>ElevenLabs Scribe v2 Realtime</strong> — WebSocket stream, partial transcripts every ~150ms</li>
+      <li><strong>RAG</strong> — pulls relevant context from past meetings / uploaded docs</li>
+      <li><strong>Groq</strong> — generates real-time coaching, answers, summaries</li>
+    </ul>
+
+    <!-- Requirements -->
+    <h2 id="requirements">Requirements</h2>
+    <table>
+      <thead><tr><th>Requirement</th><th>Version</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>macOS</td><td>13+ (Ventura)</td><td>arm64 (M1/M2/M3/M4)</td></tr>
+        <tr><td>Node.js</td><td>20+</td><td>v22+ recommended for full compat</td></tr>
+        <tr><td>npm</td><td>10+</td><td>Bundled with Node</td></tr>
+        <tr><td>Rust</td><td>Latest stable</td><td>For native audio module</td></tr>
+        <tr><td>ElevenLabs API Key</td><td>—</td><td>STT (Scribe v2 Realtime)</td></tr>
+        <tr><td>Groq API Key</td><td>—</td><td>LLM (Llama 3.3 70B) — free</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-warning">
+      <strong>Screen Recording + Microphone permissions</strong> must be granted to Epimetheus in macOS System Settings → Privacy & Security.
+    </div>
+
+    <!-- .env -->
+    <h2 id="env">Environment (.env)</h2>
+    <p>Located at <code>/Users/puttstrife/epimetheus/.env</code></p>
+    <pre><code><span class="comment"># ── Epimetheus Environment Config ──────────────────</span>
+
+<span class="comment"># ElevenLabs (STT — Scribe v2 Realtime)</span>
+<span class="key">ELEVENLABS_API_KEY</span>=<span class="val">your_key_here</span>
+
+<span class="comment"># Groq (LLM — Llama 3.3 70B, free)</span>
+<span class="key">GROQ_API_KEY</span>=<span class="val">your_key_here</span>
+
+<span class="comment"># Optional: Anthropic Claude (better reasoning)</span>
+<span class="key">CLAUDE_API_KEY</span>=<span class="val">your_key_here</span>
+
+<span class="comment"># Optional: leave blank</span>
+<span class="key">OPENAI_API_KEY</span>=
+<span class="key">GEMINI_API_KEY</span>=
+<span class="key">USE_OLLAMA</span>=false
+<span class="key">DEFAULT_MODEL</span>=claude-sonnet-4-6</code></pre>
+
+    <div class="alert alert-info">
+      Keys in <code>.env</code> are auto-loaded on startup. The app will auto-set ElevenLabs as the STT provider and Groq as the default LLM if no other configuration exists.
+    </div>
+
+    <!-- Install -->
+    <h2 id="install">Install & Run</h2>
+    <h3>Development</h3>
+    <pre><code><span class="comment"># Navigate to project</span>
+cd /Users/puttstrife/epimetheus
+
+<span class="comment"># Install dependencies (first time only ~1–2 min)</span>
+npm install
+
+<span class="comment"># Start dev build (Vite + Electron with HMR)</span>
+npm start</code></pre>
+
+    <h3>Production Build</h3>
+    <pre><code><span class="comment"># Build distributable .dmg</span>
+npm run dist</code></pre>
+
+    <div class="alert alert-success">
+      <strong>Build status:</strong> TypeScript + Vite build passes clean as of April 2026.
+    </div>
+
+    <!-- API Keys -->
+    <h2 id="api-keys">API Keys Guide</h2>
+
+    <h3>ElevenLabs</h3>
+    <ol>
+      <li>Go to <strong>elevenlabs.io</strong> → Log in</li>
+      <li>Profile → <strong>API Keys</strong> → Create API Key</li>
+      <li>Name it <code>Epimetheus</code></li>
+      <li>Enable: <strong>Speech to Text</strong>, <strong>Models</strong>, <strong>Voices (Read)</strong></li>
+      <li>Paste into <code>.env</code> as <code>ELEVENLABS_API_KEY</code></li>
+    </ol>
+
+    <h3>Groq</h3>
+    <ol>
+      <li>Go to <strong>console.groq.com</strong> → Sign up (free)</li>
+      <li>API Keys → <strong>Create API Key</strong></li>
+      <li>Name it <code>Epimetheus</code></li>
+      <li>Paste into <code>.env</code> as <code>GROQ_API_KEY</code></li>
+    </ol>
+
+    <div class="alert alert-info">
+      Groq is completely free with generous rate limits. No billing setup required.
+    </div>
+
+    <!-- STT -->
+    <h2 id="stt">STT — ElevenLabs Scribe v2 Realtime</h2>
+
+    <table>
+      <thead><tr><th>Property</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Model</td><td><code>scribe_v2_realtime</code></td></tr>
+        <tr><td>Latency</td><td>~150ms (partial transcripts)</td></tr>
+        <tr><td>Languages</td><td>90+ with auto-detection</td></tr>
+        <tr><td>Speaker diarization</td><td>Up to 32 speakers</td></tr>
+        <tr><td>Transport</td><td>WebSocket (streaming)</td></tr>
+        <tr><td>Sample rate</td><td>16,000 Hz (downsampled by app)</td></tr>
+        <tr><td>Cost</td><td>$0.39 / hr</td></tr>
+      </tbody>
+    </table>
+
+    <p>The model is hardcoded in <code>electron/audio/ElevenLabsStreamingSTT.ts</code> line 202 as <code>model_id=scribe_v2_realtime</code>. No configuration needed.</p>
+
+    <!-- LLM -->
+    <h2 id="llm">LLM — Groq (Llama 3.3 70B)</h2>
+
+    <table>
+      <thead><tr><th>Property</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Model</td><td><code>llama-3.3-70b-versatile</code></td></tr>
+        <tr><td>Speed</td><td>~800 tokens/sec</td></tr>
+        <tr><td>Context window</td><td>128k tokens</td></tr>
+        <tr><td>Cost</td><td>Free (rate limited) / ~$0.06 per 1M tokens paid</td></tr>
+        <tr><td>Best for</td><td>Real-time suggestions, interview coaching</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Alternative LLMs</h3>
+    <table>
+      <thead><tr><th>Model</th><th>Speed</th><th>Quality</th><th>Best for</th></tr></thead>
+      <tbody>
+        <tr><td>Groq Llama 3.3 70B</td><td>⚡ Fastest</td><td>Very good</td><td>Real-time copilot</td></tr>
+        <tr><td>Claude Haiku 4.5</td><td>Fast</td><td>Good</td><td>Lightweight tasks</td></tr>
+        <tr><td>Claude Sonnet 4.6</td><td>Moderate</td><td>Excellent</td><td>Complex reasoning</td></tr>
+        <tr><td>GPT-4o</td><td>Moderate</td><td>Excellent</td><td>Multimodal</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Defaults -->
+    <h2 id="defaults">Defaults Applied</h2>
+    <p>The following defaults are now baked into the Epimetheus codebase:</p>
+    <table>
+      <thead><tr><th>Setting</th><th>Default</th><th>File</th></tr></thead>
+      <tbody>
+        <tr><td>Default LLM model</td><td><code>llama-3.3-70b-versatile</code></td><td><code>electron/services/CredentialsManager.ts:170</code></td></tr>
+        <tr><td>STT provider (auto)</td><td><code>elevenlabs</code></td><td><code>electron/ProcessingHelper.ts</code></td></tr>
+        <tr><td>ElevenLabs key (auto-load)</td><td>From <code>ELEVENLABS_API_KEY</code> env</td><td><code>electron/ProcessingHelper.ts</code></td></tr>
+        <tr><td>Groq key (auto-load)</td><td>From <code>GROQ_API_KEY</code> env</td><td><code>electron/ProcessingHelper.ts</code></td></tr>
+      </tbody>
+    </table>
+
+    <!-- Roadmap -->
+    <h2>Roadmap</h2>
+
+    <div class="phase active" id="phase1">
+      <span class="phase-badge phase-current">Current — Phase 1</span>
+      <h3 style="margin-top:0;color:var(--text)">Foundation</h3>
+      <ul class="checklist">
+        <li class="done">Fork and rename project to Epimetheus</li>
+        <li class="done">npm install — all deps installed</li>
+        <li class="done">TypeScript + Vite build passing</li>
+        <li class="done">Wire ElevenLabs STT from .env</li>
+        <li class="done">Wire Groq as default LLM</li>
+        <li>Test live mic transcription</li>
+        <li>Test system audio capture</li>
+        <li>Verify Groq suggestions appear in real time</li>
+      </ul>
+    </div>
+
+    <div class="phase" id="phase2">
+      <span class="phase-badge phase-next">Next — Phase 2</span>
+      <h3 style="margin-top:0;color:var(--text)">Branding & UI</h3>
+      <ul class="checklist">
+        <li>New app icon (Epimetheus — Titan of afterthought)</li>
+        <li>Custom color palette & theme tokens</li>
+        <li>Rename all UI strings, window titles, tray labels</li>
+        <li>Custom onboarding flow</li>
+        <li>Remove upstream token/premium gating UI</li>
+      </ul>
+    </div>
+
+    <div class="phase" id="phase3">
+      <span class="phase-badge phase-future">Phase 3</span>
+      <h3 style="margin-top:0;color:var(--text)">Feature Tweaks</h3>
+      <ul class="checklist">
+        <li>Strip crypto/token integration</li>
+        <li>Simplify AI provider settings UI</li>
+        <li>Custom system prompts per session type</li>
+        <li>Persona system (Designer, PM, Engineer, etc.)</li>
+        <li>Hotkey customization</li>
+      </ul>
+    </div>
+
+    <div class="phase" id="phase4">
+      <span class="phase-badge phase-future">Phase 4</span>
+      <h3 style="margin-top:0;color:var(--text)">Personal Integrations</h3>
+      <ul class="checklist">
+        <li>ElevenLabs TTS for voice responses (optional)</li>
+        <li>Export to Markdown / PDF / Notion</li>
+        <li>Local RAG improvements</li>
+        <li>Calendar integration</li>
+      </ul>
+    </div>
+
+    <div class="phase" id="phase5">
+      <span class="phase-badge phase-future">Phase 5</span>
+      <h3 style="margin-top:0;color:var(--text)">Advanced</h3>
+      <ul class="checklist">
+        <li>System design diagram generation (Mermaid/D3)</li>
+        <li>Multi-language transcription (Tagalog + English)</li>
+        <li>Collaborative session sharing</li>
+        <li>Plugin system for custom post-processing</li>
+      </ul>
+    </div>
+
+    <!-- Cost -->
+    <h2 id="cost">Cost Breakdown</h2>
+    <table>
+      <thead><tr><th>Service</th><th>Plan</th><th>Cost</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>ElevenLabs STT</td><td>Free credits → ElevenAPI top-up</td><td>$0.39/hr</td><td>6,443 credits available now</td></tr>
+        <tr><td>Groq LLM</td><td>Free tier</td><td>$0</td><td>Rate limited but enough for personal use</td></tr>
+        <tr><td>Anthropic Claude</td><td>BYOK (optional)</td><td>~$5–10/mo</td><td>Upgrade path for better reasoning</td></tr>
+        <tr><td><strong>Epimetheus app</strong></td><td>Open source</td><td><strong>$0</strong></td><td>Forever free</td></tr>
+      </tbody>
+    </table>
+
+    <!-- vs Cluely -->
+    <h2 id="vs-cluely">Epimetheus vs Cluely</h2>
+    <table>
+      <thead><tr><th>Feature</th><th>Cluely</th><th>Epimetheus</th></tr></thead>
+      <tbody>
+        <tr><td>Price</td><td>~$40/mo</td><td>$0 app + API costs (~$27–32/mo)</td></tr>
+        <tr><td>STT</td><td>Proprietary</td><td>ElevenLabs Scribe v2 Realtime</td></tr>
+        <tr><td>LLM</td><td>Proprietary</td><td>Groq / Claude / OpenAI (BYOK)</td></tr>
+        <tr><td>Data privacy</td><td>Cluely servers</td><td>Your API keys only</td></tr>
+        <tr><td>Customizable</td><td>No</td><td>Fully open source</td></tr>
+        <tr><td>Offline RAG</td><td>No</td><td>Yes (SQLite + sqlite-vec)</td></tr>
+        <tr><td>Latency</td><td>Optimized hosted</td><td>Slightly behind (local Electron)</td></tr>
+      </tbody>
+    </table>
+
+    <!-- License -->
+    <h2 id="license">License</h2>
+    <div class="alert alert-warning">
+      <strong>AGPL-3.0</strong> — You can fork, modify, and use Epimetheus freely. If you distribute it or run it as a network service, your modifications must also be open source under AGPL-3.0. Personal use has no restrictions.
+    </div>
+    <p>Upstream: <a href="https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant">Natively-AI-assistant/natively-cluely-ai-assistant</a></p>
+    <p>Fork: <a href="https://github.com/puttstrife/epimetheus">puttstrife/epimetheus</a></p>
+
+    <div class="footer">
+      <p>Epimetheus — Last updated April 2026 · Built by Jeffrey Farañal</p>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>
