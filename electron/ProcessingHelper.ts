@@ -85,6 +85,28 @@ export class ProcessingHelper {
       this.llmHelper.setEpimetheusKey(epimetheusKey);
     }
 
+    // Auto-configure ElevenLabs STT from .env if not already set in CredentialsManager
+    const elevenLabsEnvKey = process.env.ELEVENLABS_API_KEY;
+    if (elevenLabsEnvKey && !credManager.getElevenLabsApiKey()) {
+      console.log("[ProcessingHelper] Auto-loading ElevenLabs API Key from .env");
+      credManager.setElevenLabsApiKey(elevenLabsEnvKey);
+    }
+    if (credManager.getElevenLabsApiKey() && credManager.getSttProvider() === 'none') {
+      console.log("[ProcessingHelper] Auto-setting STT provider to ElevenLabs");
+      credManager.setSttProvider('elevenlabs');
+    }
+
+    // Auto-configure Groq as default LLM from .env if no model set
+    const groqEnvKey = process.env.GROQ_API_KEY;
+    if (groqEnvKey && !credManager.getGroqApiKey()) {
+      console.log("[ProcessingHelper] Auto-loading Groq API Key from .env");
+      credManager.setGroqApiKey(groqEnvKey);
+    }
+    if (credManager.getGroqApiKey() && !credManager.getAllCredentials().defaultModel) {
+      console.log("[ProcessingHelper] Auto-setting default model to Groq llama-3.3-70b-versatile");
+      credManager.setDefaultModel('llama-3.3-70b-versatile');
+    }
+
     // CRITICAL: Re-initialize IntelligenceManager now that keys are loaded
     // This fixes the issue where buttons don't work in production because of late key loading
     this.appState.getIntelligenceManager().initializeLLMs();
