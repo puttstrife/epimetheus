@@ -30,12 +30,12 @@ export const JDAwarenessToaster: React.FC<JDAwarenessToasterProps> = ({ classNam
     }, [isOpen, onDismiss]);
 
     const handleDismiss = () => {
-        localStorage.setItem('natively_jd_toaster_dismissed', Date.now().toString());
+        localStorage.setItem('epimetheus_jd_toaster_dismissed', Date.now().toString());
         onDismiss();
     };
 
     const handlePrimaryAction = () => {
-        localStorage.setItem('natively_jd_toaster_dismissed', Date.now().toString());
+        localStorage.setItem('epimetheus_jd_toaster_dismissed', Date.now().toString());
         onDismiss();
         onSetupJD();
     };

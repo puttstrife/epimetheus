@@ -33,12 +33,12 @@ export const PremiumPromoToaster: React.FC<PremiumPromoToasterProps> = ({ classN
     }, [isOpen, onDismiss]);
 
     const handleDismiss = () => {
-        localStorage.setItem('natively_promo_toaster_dismissed', Date.now().toString());
+        localStorage.setItem('epimetheus_promo_toaster_dismissed', Date.now().toString());
         onDismiss();
     };
 
     const handlePrimaryAction = () => {
-        localStorage.setItem('natively_promo_toaster_dismissed', Date.now().toString());
+        localStorage.setItem('epimetheus_promo_toaster_dismissed', Date.now().toString());
         onDismiss();
         onUpgrade();
     };

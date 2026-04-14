@@ -165,7 +165,7 @@ export const AIProvidersSettings: React.FC = () => {
             // @ts-ignore
             const unsubscribe = window.electronAPI.onGroqFastTextChanged((enabled: boolean) => {
                 setFastResponseMode(enabled);
-                localStorage.setItem('natively_groq_fast_text', String(enabled));
+                localStorage.setItem('epimetheus_groq_fast_text', String(enabled));
             });
             return () => unsubscribe();
         }
@@ -175,7 +175,7 @@ export const AIProvidersSettings: React.FC = () => {
     useEffect(() => {
         if (!hasStoredKey.groq && fastResponseMode) {
             setFastResponseMode(false);
-            localStorage.setItem('natively_groq_fast_text', 'false');
+            localStorage.setItem('epimetheus_groq_fast_text', 'false');
             // @ts-ignore
             window.electronAPI?.setGroqFastTextMode(false);
         }
@@ -475,7 +475,7 @@ export const AIProvidersSettings: React.FC = () => {
                             }
                             const newState = !fastResponseMode;
                             setFastResponseMode(newState);
-                            localStorage.setItem('natively_groq_fast_text', String(newState));
+                            localStorage.setItem('epimetheus_groq_fast_text', String(newState));
                             // @ts-ignore
                             await window.electronAPI?.setGroqFastTextMode(newState);
                         }}

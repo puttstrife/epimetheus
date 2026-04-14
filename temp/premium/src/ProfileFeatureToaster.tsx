@@ -30,12 +30,12 @@ export const ProfileFeatureToaster: React.FC<ProfileFeatureToasterProps> = ({ cl
     }, [isOpen, onDismiss]);
 
     const handleDismiss = () => {
-        localStorage.setItem('natively_profile_toaster_dismissed', Date.now().toString());
+        localStorage.setItem('epimetheus_profile_toaster_dismissed', Date.now().toString());
         onDismiss();
     };
 
     const handlePrimaryAction = () => {
-        localStorage.setItem('natively_profile_toaster_dismissed', Date.now().toString());
+        localStorage.setItem('epimetheus_profile_toaster_dismissed', Date.now().toString());
         onDismiss();
         onSetupProfile();
     };

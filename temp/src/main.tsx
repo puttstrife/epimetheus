@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client"
 import App from "./App"
 import "./index.css"
 
-const THEME_CACHE_KEY = 'natively_resolved_theme';
+const THEME_CACHE_KEY = 'epimetheus_resolved_theme';
 
 // Step 1: Apply cached theme synchronously — before React renders.
 // This ensures useResolvedTheme()'s initial useState read sees the correct value.

@@ -1,8 +1,8 @@
 {
-  "name": "natively",
+  "name": "epimetheus",
   "version": "2.4.0",
   "main": "dist-electron/electron/main.js",
-  "description": "Natively is a meeting notes app that uses AI to generate notes from your meetings.",
+  "description": "Epimetheus is a meeting notes app that uses AI to generate notes from your meetings.",
   "scripts": {
     "clean": "rimraf dist dist-electron",
     "dev": "vite",
@@ -15,7 +15,7 @@
     "electron:dev": "npm run build:electron && cross-env NODE_ENV=development electron .",
     "electron:build": "npm run build:electron && cross-env NODE_ENV=production electron .",
     "app:dev": "concurrently \"npm run dev -- --port 5180 --strictPort\" \"wait-on http://localhost:5180 && npm run electron:dev\"",
-    "app:build": "npm run build && npm run build:electron && cross-env NATIVELY_BUILD_ALL_MAC_ARCHES=1 npm run build:native && electron-builder",
+    "app:build": "npm run build && npm run build:electron && cross-env EPIMETHEUS_BUILD_ALL_MAC_ARCHES=1 npm run build:native && electron-builder",
     "watch": "tsc -p electron/tsconfig.json --watch",
     "start": "npm run app:dev",
     "dist": "npm run app:build",
@@ -25,7 +25,7 @@
     "generateUpdatesFilesForAllChannels": true,
     "appId": "com.electron.meeting-notes",
     "afterPack": "./scripts/ad-hoc-sign.js",
-    "productName": "Natively",
+    "productName": "Epimetheus",
     "files": [
       "dist",
       "dist-electron",
@@ -50,8 +50,8 @@
         "to": "assets/"
       },
       {
-        "from": "assets/natively.icns",
-        "to": "natively.icns"
+        "from": "assets/epimetheus.icns",
+        "to": "epimetheus.icns"
       },
       {
         "from": "resources/models/",
@@ -76,12 +76,12 @@
           ]
         }
       ],
-      "icon": "assets/natively.icns",
+      "icon": "assets/epimetheus.icns",
       "identity": null,
       "hardenedRuntime": false,
       "extendInfo": {
-        "NSScreenCaptureUsageDescription": "Natively needs Screen Recording permission to capture system audio for meeting transcription.",
-        "NSMicrophoneUsageDescription": "Natively needs microphone access to transcribe your voice during meetings."
+        "NSScreenCaptureUsageDescription": "Epimetheus needs Screen Recording permission to capture system audio for meeting transcription.",
+        "NSMicrophoneUsageDescription": "Epimetheus needs microphone access to transcribe your voice during meetings."
       }
     },
     "win": {
@@ -131,8 +131,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "evinjohnn",
-        "repo": "natively-cluely-ai-assistant",
+        "owner": "puttstrife",
+        "repo": "epimetheus",
         "releaseType": "release"
       }
     ]

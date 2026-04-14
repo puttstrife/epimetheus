@@ -19,7 +19,7 @@ process.on('unhandledRejection', (reason, promise) => {
   logToFile('[CRITICAL] Unhandled Rejection at: ' + promise + ' reason: ' + (reason instanceof Error ? reason.stack : reason));
 });
 
-const logFile = path.join(app.getPath('documents'), 'natively_debug.log');
+const logFile = path.join(app.getPath('documents'), 'epimetheus_debug.log');
 
 const originalLog = console.log;
 const originalWarn = console.warn;
@@ -664,7 +664,7 @@ export class AppState {
     // Workaround: Open the folder containing the downloaded update so user can install manually
     if (process.platform === 'darwin') {
       try {
-        // Get the downloaded update file path (e.g., .../Natively-1.0.9-mac.zip)
+        // Get the downloaded update file path (e.g., .../Epimetheus-1.0.9-mac.zip)
         const updateFile = (autoUpdater as any).downloadedUpdateHelper?.file
         console.log('[AutoUpdater] Downloaded update file:', updateFile)
 
@@ -1756,7 +1756,7 @@ export class AppState {
     trayIcon.setTemplateImage(iconToUse.endsWith('Template.png'));
 
     this.tray = new Tray(trayIcon)
-    this.tray.setToolTip('Natively') // This tooltip might also need update if we change global shortcut, but global shortcut is removed.
+    this.tray.setToolTip('Epimetheus') // This tooltip might also need update if we change global shortcut, but global shortcut is removed.
     this.updateTrayMenu();
 
     // Double-click to show window
@@ -1774,7 +1774,7 @@ export class AppState {
     console.log('[Main] updateTrayMenu called. Screenshot Accelerator:', screenshotAccel);
 
     // Update tooltip for verification
-    this.tray.setToolTip('Natively');
+    this.tray.setToolTip('Epimetheus');
 
     // Helper to format accelerator for display (e.g. CommandOrControl+H -> Cmd+H)
     const formatAccel = (accel: string) => {
@@ -1794,7 +1794,7 @@ export class AppState {
 
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: 'Show Natively',
+        label: 'Show Epimetheus',
         click: () => {
           this.centerAndShowWindow()
         }
@@ -1925,7 +1925,7 @@ export class AppState {
           console.log('[Stealth] Calling app.dock.hide()');
           app.dock.hide();
           this.hideTray();
-          // Do NOT call focus() here — Natively is a ghost overlay.
+          // Do NOT call focus() here — Epimetheus is a ghost overlay.
           // focus() → [NSApp activateIgnoringOtherApps:YES] which steals OS focus
           // from whatever the user is currently doing (Zoom, browser, etc.)
         } else {
@@ -1975,7 +1975,7 @@ export class AppState {
   }
 
   private _applyDisguise(mode: 'terminal' | 'settings' | 'activity' | 'none'): void {
-    let appName = "Natively";
+    let appName = "Epimetheus";
     let iconPath = "";
 
     const isWin = process.platform === 'win32';
@@ -2019,11 +2019,11 @@ export class AppState {
         }
         break;
       case 'none':
-        appName = "Natively";
+        appName = "Epimetheus";
         if (isMac) {
           iconPath = app.isPackaged
-            ? path.join(process.resourcesPath, "natively.icns")
-            : path.join(app.getAppPath(), "assets/natively.icns");
+            ? path.join(process.resourcesPath, "epimetheus.icns")
+            : path.join(app.getAppPath(), "assets/epimetheus.icns");
         } else if (isWin) {
           iconPath = app.isPackaged
             ? path.join(process.resourcesPath, "assets/icons/win/icon.ico")
@@ -2055,7 +2055,7 @@ export class AppState {
     // 3. Update App User Model ID (Windows Taskbar grouping)
     if (isWin) {
       // Use unique AUMID per disguise to avoid grouping with the real app
-      app.setAppUserModelId(`com.natively.assistant.${mode}`);
+      app.setAppUserModelId(`com.epimetheus.assistant.${mode}`);
     }
 
     // 4. Update Icons

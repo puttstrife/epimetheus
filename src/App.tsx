@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react" // forcing refresh
 import { QueryClient, QueryClientProvider } from "react-query"
 import { ToastProvider, ToastViewport } from "./components/ui/toast"
-import NativelyInterface from "./components/NativelyInterface"
+import EpimetheusInterface from "./components/EpimetheusInterface"
 import SettingsPopup from "./components/SettingsPopup" // Keeping for legacy/specific window support if needed
 import Launcher from "./components/Launcher"
 import ModelSelectorWindow from "./components/ModelSelectorWindow"
@@ -10,7 +10,7 @@ import StartupSequence from "./components/StartupSequence"
 import { AnimatePresence, motion } from "framer-motion"
 import UpdateBanner from "./components/UpdateBanner"
 import { SupportToaster } from "./components/SupportToaster"
-import { NativelyQuotaBanner } from "./components/NativelyQuotaBanner"
+import { EpimetheusQuotaBanner } from "./components/EpimetheusQuotaBanner"
 import { FreeTrialBanner }      from "./components/trial/FreeTrialBanner"
 import { FreeTrialModal }       from "./components/trial/FreeTrialModal"
 import { TrialPromoToaster }    from "./components/trial/TrialPromoToaster"
@@ -23,7 +23,7 @@ import {
   PremiumPromoToaster,
   RemoteCampaignToaster,
   PremiumUpgradeModal,
-  NativelyApiPromoToaster,
+  EpimetheusApiPromoToaster,
   MaxUltraUpgradeToaster,
   useAdCampaigns
 } from './premium'
@@ -96,7 +96,7 @@ const App: React.FC = () => {
   // Overlay opacity — only meaningful when isOverlayWindow, but stored centrally
   // so it can be initialized once from localStorage and updated via IPC.
   const [overlayOpacity, setOverlayOpacity] = useState<number>(() => {
-    const stored = localStorage.getItem('natively_overlay_opacity');
+    const stored = localStorage.getItem('epimetheus_overlay_opacity');
     const parsed = stored ? parseFloat(stored) : NaN;
     // Treat missing value or the old default (0.65) as "not user-set"
     const isUserSet = Number.isFinite(parsed) && parsed !== OVERLAY_OPACITY_DEFAULT;
@@ -121,7 +121,7 @@ const App: React.FC = () => {
   const [incompatibleWarning, setIncompatibleWarning] = useState<{count: number; oldProvider: string; newProvider: string} | null>(null);
   
   // API check
-  const [hasNativelyApi, setHasNativelyApi] = useState<boolean>(false);
+  const [hasEpimetheusApi, setHasEpimetheusApi] = useState<boolean>(false);
 
   // ── Onboarding / promo toasters ───────────────────────────
   const [showPermissionsToaster, setShowPermissionsToaster] = useState(false);
@@ -142,7 +142,7 @@ const App: React.FC = () => {
     appStartTime,
     lastMeetingEndTime,
     isProcessingMeeting,
-    hasNativelyApi
+    hasEpimetheusApi
   );
 
   // Preview shortcuts — Ctrl/Cmd+Shift+1-5 force-show any ad card.
@@ -151,7 +151,7 @@ const App: React.FC = () => {
     const CODE_MAP: Record<string, string> = {
       'Digit1': 'max_ultra_upgrade',
       'Digit2': 'promo',
-      'Digit3': 'natively_api',
+      'Digit3': 'epimetheus_api',
       'Digit4': 'profile',
       'Digit5': 'jd',
     };
@@ -187,9 +187,9 @@ const App: React.FC = () => {
         }).catch(() => {});
       });
 
-    // Also check for Natively API key
+    // Also check for Epimetheus API key
     window.electronAPI?.getStoredCredentials?.()
-      .then((creds) => setHasNativelyApi(!!creds?.hasNativelyKey))
+      .then((creds) => setHasEpimetheusApi(!!creds?.hasEpimetheusKey))
       .catch(() => {});
 
     // ── Trial: check stored token and start polling if active ──
@@ -240,7 +240,7 @@ const App: React.FC = () => {
 
     // ── Onboarding toasters ──────────────────────────────────
     if (isLauncherWindow || isDefault) {
-      const permsShown = localStorage.getItem('natively_perms_shown_v1');
+      const permsShown = localStorage.getItem('epimetheus_perms_shown_v1');
       if (!permsShown) {
         // First ever launch — show permissions toaster
         setShowPermissionsToaster(true);
@@ -307,7 +307,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!isOverlayWindow || !window.electronAPI?.onThemeChanged) return;
     return window.electronAPI.onThemeChanged(() => {
-      const stored = localStorage.getItem('natively_overlay_opacity');
+      const stored = localStorage.getItem('epimetheus_overlay_opacity');
       if (!stored) {
         setOverlayOpacity(getDefaultOverlayOpacity());
       }
@@ -325,7 +325,7 @@ const App: React.FC = () => {
 
   const handleStartMeeting = async () => {
     try {
-      localStorage.setItem('natively_last_meeting_start', Date.now().toString());
+      localStorage.setItem('epimetheus_last_meeting_start', Date.now().toString());
       const inputDeviceId = localStorage.getItem('preferredInputDeviceId');
       let outputDeviceId = localStorage.getItem('preferredOutputDeviceId');
       const useExperimentalSck = localStorage.getItem('useExperimentalSckBackend') === 'true';
@@ -366,14 +366,14 @@ const App: React.FC = () => {
       await window.electronAPI.endMeeting();
       console.log("[App.tsx] endMeeting IPC completed");
       
-      const startStr = localStorage.getItem('natively_last_meeting_start');
+      const startStr = localStorage.getItem('epimetheus_last_meeting_start');
       if (startStr) {
         const duration = Date.now() - parseInt(startStr, 10);
         const threshold = import.meta.env.DEV ? 10000 : 180000;
         if (duration >= threshold) {
-          localStorage.setItem('natively_show_profile_toaster', 'true');
+          localStorage.setItem('epimetheus_show_profile_toaster', 'true');
         }
-        localStorage.removeItem('natively_last_meeting_start');
+        localStorage.removeItem('epimetheus_last_meeting_start');
       }
 
       // Switch back to Native Launcher Mode
@@ -429,7 +429,7 @@ const App: React.FC = () => {
                   transition: 'background-color 75ms ease, border-color 75ms ease, box-shadow 75ms ease'
                 } as React.CSSProperties}
               >
-                <NativelyInterface
+                <EpimetheusInterface
                   onEndMeeting={handleEndMeeting}
                   overlayOpacity={overlayOpacity}
                 />
@@ -538,7 +538,7 @@ const App: React.FC = () => {
 
       <UpdateBanner />
       <SupportToaster />
-      <NativelyQuotaBanner />
+      <EpimetheusQuotaBanner />
 
 
 
@@ -558,7 +558,7 @@ const App: React.FC = () => {
       <PermissionsToaster
         isOpen={showPermissionsToaster}
         onDismiss={() => {
-          localStorage.setItem('natively_perms_shown_v1', '1');
+          localStorage.setItem('epimetheus_perms_shown_v1', '1');
           setShowPermissionsToaster(false);
           // After permissions, allow trial promo on next launch
         }}
@@ -567,7 +567,7 @@ const App: React.FC = () => {
       {/* Trial promo toaster — 5s after restart (self-gates via localStorage + conditions) */}
       <TrialPromoToaster
         isOpen={showTrialPromo}
-        hasNativelyKey={hasNativelyApi}
+        hasEpimetheusKey={hasEpimetheusApi}
         hasTrialToken={!!activeTrial}
         onDismiss={() => setShowTrialPromo(false)}
         onStartTrial={async () => {
@@ -605,9 +605,9 @@ const App: React.FC = () => {
       {/* Ad toasters — render whenever activeAd is set (isLauncherMainView guard bypassed
           when triggered via preview shortcut so the card always surfaces) */}
       {(isLauncherMainView || !!activeAd) && !isSettingsOpen && (
-        <NativelyApiPromoToaster
-          isOpen={activeAd === 'natively_api'}
-          onDismiss={() => dismissAd('natively_api')}
+        <EpimetheusApiPromoToaster
+          isOpen={activeAd === 'epimetheus_api'}
+          onDismiss={() => dismissAd('epimetheus_api')}
           onOpenSettings={(tab: string) => {
             setSettingsInitialTab(tab);
             setIsSettingsOpen(true);

@@ -120,7 +120,7 @@ export const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ isOpen
                             </div>
                             <h2 className={`text-[18px] font-semibold tracking-tight ${isLight ? 'text-text-primary' : 'text-white/90'}`}>Pro License Active</h2>
                             <p className={`text-[13px] mt-2 max-w-[280px] mx-auto leading-relaxed mb-8 ${isLight ? 'text-text-secondary' : 'text-white/50'}`}>
-                                Your device is fully authorized for Natively's premium features including the Profile Engine, Job Description Intelligence, and Company Research.
+                                Your device is fully authorized for Epimetheus's premium features including the Profile Engine, Job Description Intelligence, and Company Research.
                             </p>
 
                             <button
@@ -165,7 +165,7 @@ export const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ isOpen
 
                             {/* Buy button */}
                             <button
-                                onClick={() => window.electronAPI?.openExternal?.('https://evynignatious.gumroad.com/l/natively')}
+                                onClick={() => window.electronAPI?.openExternal?.('https://evynignatious.gumroad.com/l/epimetheus')}
                                 className="mt-5 w-full py-2.5 rounded-[10px] bg-[#FACC15] text-black text-[12px] font-semibold hover:bg-[#FDE047] active:scale-[0.98] transition-all duration-200 flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.15)] hover:shadow-[0_0_20px_rgba(250,204,21,0.25)]"
                             >
                                 Purchase License

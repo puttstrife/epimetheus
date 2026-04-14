@@ -3,7 +3,7 @@
  * Configuration for STT providers (Google gRPC, REST, WebSocket)
  */
 
-export type SttProviderId = 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'natively';
+export type SttProviderId = 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'epimetheus';
 
 export interface SttProviderConfig {
     id: SttProviderId;
@@ -113,10 +113,10 @@ export const STT_PROVIDERS: Record<SttProviderId, SttProviderConfig> = {
         }),
         responseContentPath: 'results[0].alternatives[0].transcript',
     },
-    natively: {
-        id: 'natively',
-        name: 'Natively Pro (Managed)',
-        description: 'All-in-one managed STT via Natively API',
+    epimetheus: {
+        id: 'epimetheus',
+        name: 'Epimetheus Pro (Managed)',
+        description: 'All-in-one managed STT via Epimetheus API',
         endpoint: '', 
         model: '',
         uploadType: 'websocket',

@@ -120,8 +120,8 @@ let cached: NativeModule | null | undefined = undefined;
 /**
  * Loads the Rust native module directly from the .node binary file.
  *
- * We bypass `require('natively-audio')` intentionally. That approach relied on
- * npm creating a symlink from node_modules/natively-audio -> native-module/,
+ * We bypass `require('epimetheus-audio')` intentionally. That approach relied on
+ * npm creating a symlink from node_modules/epimetheus-audio -> native-module/,
  * which breaks on Windows (Git Bash produces POSIX-style symlinks that Node
  * can't resolve). Loading the .node file directly avoids npm entirely.
  *

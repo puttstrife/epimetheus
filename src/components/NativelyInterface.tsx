@@ -66,12 +66,12 @@ interface Message {
     };
 }
 
-interface NativelyInterfaceProps {
+interface EpimetheusInterfaceProps {
     onEndMeeting?: () => void;
     overlayOpacity?: number;
 }
 
-const NativelyInterface: React.FC<NativelyInterfaceProps> = ({ onEndMeeting, overlayOpacity = OVERLAY_OPACITY_DEFAULT }) => {
+const EpimetheusInterface: React.FC<EpimetheusInterfaceProps> = ({ onEndMeeting, overlayOpacity = OVERLAY_OPACITY_DEFAULT }) => {
     const isLightTheme = useResolvedTheme() === 'light';
     const [isExpanded, setIsExpanded] = useState(true);
     const [inputValue, setInputValue] = useState('');
@@ -86,7 +86,7 @@ const NativelyInterface: React.FC<NativelyInterfaceProps> = ({ onEndMeeting, ove
     const [manualTranscript, setManualTranscript] = useState('');
     const manualTranscriptRef = useRef<string>('');
     const [showTranscript, setShowTranscript] = useState(() => {
-        const stored = localStorage.getItem('natively_interviewer_transcript');
+        const stored = localStorage.getItem('epimetheus_interviewer_transcript');
         return stored !== 'false';
     });
 
@@ -96,7 +96,7 @@ const NativelyInterface: React.FC<NativelyInterfaceProps> = ({ onEndMeeting, ove
     // Sync transcript setting
     useEffect(() => {
         const handleStorage = () => {
-            const stored = localStorage.getItem('natively_interviewer_transcript');
+            const stored = localStorage.getItem('epimetheus_interviewer_transcript');
             setShowTranscript(stored !== 'false');
         };
         window.addEventListener('storage', handleStorage);
@@ -123,7 +123,7 @@ const NativelyInterface: React.FC<NativelyInterfaceProps> = ({ onEndMeeting, ove
     // Settings State with Persistence
     const [isUndetectable, setIsUndetectable] = useState(false);
     const [hideChatHidesWidget, setHideChatHidesWidget] = useState(() => {
-        const stored = localStorage.getItem('natively_hideChatHidesWidget');
+        const stored = localStorage.getItem('epimetheus_hideChatHidesWidget');
         return stored ? stored === 'true' : true;
     });
 
@@ -210,8 +210,8 @@ const NativelyInterface: React.FC<NativelyInterfaceProps> = ({ onEndMeeting, ove
 
     // Persist Settings
     useEffect(() => {
-        localStorage.setItem('natively_undetectable', String(isUndetectable));
-        localStorage.setItem('natively_hideChatHidesWidget', String(hideChatHidesWidget));
+        localStorage.setItem('epimetheus_undetectable', String(isUndetectable));
+        localStorage.setItem('epimetheus_hideChatHidesWidget', String(hideChatHidesWidget));
     }, [isUndetectable, hideChatHidesWidget]);
 
     // Mouse Passthrough State
@@ -262,7 +262,7 @@ const NativelyInterface: React.FC<NativelyInterfaceProps> = ({ onEndMeeting, ove
 
                 // Send exact dimensions to Electron
                 // Removed buffer to ensure tight fit
-                console.log('[NativelyInterface] ResizeObserver:', Math.ceil(rect.width), Math.ceil(rect.height));
+                console.log('[EpimetheusInterface] ResizeObserver:', Math.ceil(rect.width), Math.ceil(rect.height));
                 window.electronAPI?.updateContentDimensions({
                     width: Math.ceil(rect.width),
                     height: Math.ceil(rect.height)
@@ -360,7 +360,7 @@ const NativelyInterface: React.FC<NativelyInterfaceProps> = ({ onEndMeeting, ove
     useEffect(() => {
         if (!window.electronAPI?.onSessionReset) return;
         const unsubscribe = window.electronAPI.onSessionReset(() => {
-            console.log('[NativelyInterface] Resetting session state...');
+            console.log('[EpimetheusInterface] Resetting session state...');
             setMessages([]);
             setInputValue('');
             setAttachedContext([]);
@@ -1187,7 +1187,7 @@ const NativelyInterface: React.FC<NativelyInterfaceProps> = ({ onEndMeeting, ove
             setManualTranscript('');  // Clear live preview
 
             // Send manual finalization signal to STT Providers
-            window.electronAPI.finalizeMicSTT().catch(err => console.error('[NativelyInterface] Failed to send finalizeMicSTT:', err));
+            window.electronAPI.finalizeMicSTT().catch(err => console.error('[EpimetheusInterface] Failed to send finalizeMicSTT:', err));
 
             const currentAttachments = attachedContext;
             setAttachedContext([]); // Clear context immediately on send
@@ -2356,4 +2356,4 @@ Provide only the answer, nothing else.`;
     );
 };
 
-export default NativelyInterface;
+export default EpimetheusInterface;

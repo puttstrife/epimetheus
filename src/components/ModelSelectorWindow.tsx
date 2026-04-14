@@ -73,8 +73,8 @@ const ModelSelectorWindow = () => {
                 // Build the list
                 const models: ModelOption[] = [];
 
-                if (creds?.hasNativelyKey) {
-                    models.push({ id: 'natively', name: 'Natively API', type: 'cloud', provider: 'natively' });
+                if (creds?.hasEpimetheusKey) {
+                    models.push({ id: 'epimetheus', name: 'Epimetheus API', type: 'cloud', provider: 'epimetheus' });
                 }
 
                 // Cloud Models — standard models + unique preferred models
