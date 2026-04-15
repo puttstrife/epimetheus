@@ -4,7 +4,6 @@ import { generateMeetingPDF } from '../utils/pdfGenerator';
 import icon from "./icon.png";
 import mainui from "../UI_comp/mainui.png";
 import calender from "../UI_comp/calender.png";
-import ConnectCalendarButton from './ui/ConnectCalendarButton';
 import MeetingDetails from './MeetingDetails';
 import TopSearchPill from './TopSearchPill';
 import GlobalChatOverlay from './GlobalChatOverlay';
@@ -742,33 +741,16 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onP
 
 
 
-                                        {/* Right Secondary Card */}
-                                        <div className="md:col-span-1 rounded-xl overflow-hidden bg-bg-elevated relative group flex flex-col items-center pt-6 text-center">
-                                            {/* Backdrop Image */}
+                                        {/* Right Secondary Card — Calendar (disabled) */}
+                                        <div className="md:col-span-1 rounded-xl overflow-hidden bg-bg-elevated relative group flex flex-col items-center pt-6 text-center opacity-40 pointer-events-none select-none">
                                             <div className="absolute inset-0">
                                                 <img src={calender} alt="" className="w-full h-full object-cover opacity-100 transition-opacity duration-500 translate-x--1 translate-y-[1px] scale-105" />
                                             </div>
-
-                                            {/* Content Layer */}
                                             <div className="relative z-10 w-full flex flex-col items-center h-full">
                                                 <h3 className="text-[19px] leading-tight mb-4">
-                                                    {isCalendarConnected ? (
-                                                        <>
-                                                            <span className="block font-semibold text-white">Calendar linked</span>
-                                                            <span className="block font-medium text-white/60 text-[0.95em]">Events synced</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <span className="block font-semibold text-white">Link your calendar to</span>
-                                                            <span className="block font-medium text-white/60 text-[0.95em]">see upcoming events</span>
-                                                        </>
-                                                    )}
+                                                    <span className="block font-semibold text-white">Calendar</span>
+                                                    <span className="block font-medium text-white/60 text-[0.95em]">Coming soon</span>
                                                 </h3>
-
-                                                <ConnectCalendarButton
-                                                    className="-translate-x-0.5"
-                                                    onConnect={() => setIsCalendarConnected(true)}
-                                                />
                                             </div>
                                         </div>
                                     </div>
