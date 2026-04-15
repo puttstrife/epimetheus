@@ -37,6 +37,20 @@ let content = fs.readFileSync(plistPath, 'utf8');
 
 let modified = false;
 
+// Patch CFBundleName and CFBundleDisplayName to show "Epimetheus" instead of "Electron"
+if (content.includes('<string>Electron</string>')) {
+  content = content.replace(
+    /<key>CFBundleDisplayName<\/key>\s*<string>Electron<\/string>/,
+    '<key>CFBundleDisplayName</key>\n\t<string>Epimetheus</string>'
+  );
+  content = content.replace(
+    /<key>CFBundleName<\/key>\s*<string>Electron<\/string>/,
+    '<key>CFBundleName</key>\n\t<string>Epimetheus</string>'
+  );
+  modified = true;
+  console.log('[patch-electron-plist] Renamed Electron → Epimetheus in bundle names.');
+}
+
 // Patch NSScreenCaptureUsageDescription
 if (!content.includes('NSScreenCaptureUsageDescription')) {
   content = content.replace(
