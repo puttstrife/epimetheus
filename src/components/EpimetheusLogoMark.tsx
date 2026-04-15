@@ -1,9 +1,7 @@
 import React from 'react';
 
 /**
- * Epimetheus logomark — "N" letterform inscribed in a circle.
- * Rendered as inline SVG so it inherits `color` (currentColor) and
- * can be styled freely with className.
+ * Epimetheus logomark — "e" letterform inscribed in a circle.
  */
 export const EpimetheusLogoMark: React.FC<{
     size?: number;
@@ -28,38 +26,28 @@ export const EpimetheusLogoMark: React.FC<{
         />
 
         {/*
-          The "N" lettermark — three strokes:
-            Left vertical bar
-            Diagonal stroke (top-left → bottom-right)
-            Right vertical bar
-          All strokes use round caps and joins to keep it crisp at small sizes.
+          "e" letterform:
+          - Horizontal mid-bar
+          - Arc from mid-left, sweeping up and around, open on the right
         */}
 
-        {/* Left vertical bar */}
+        {/* Horizontal mid-bar */}
         <line
-            x1="26" y1="22"
-            x2="26" y2="78"
+            x1="24" y1="50"
+            x2="72" y2="50"
             stroke="currentColor"
-            strokeWidth="9"
+            strokeWidth="8"
             strokeLinecap="round"
         />
 
-        {/* Diagonal */}
-        <line
-            x1="26" y1="22"
-            x2="74" y2="78"
+        {/* "e" arc — starts at mid-right, sweeps counter-clockwise around to bottom-right */}
+        <path
+            d="M 72 50
+               A 26 26 0 1 0 66 71"
             stroke="currentColor"
-            strokeWidth="9"
+            strokeWidth="8"
             strokeLinecap="round"
-        />
-
-        {/* Right vertical bar */}
-        <line
-            x1="74" y1="22"
-            x2="74" y2="78"
-            stroke="currentColor"
-            strokeWidth="9"
-            strokeLinecap="round"
+            fill="none"
         />
     </svg>
 );
