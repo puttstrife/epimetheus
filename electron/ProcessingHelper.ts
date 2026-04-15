@@ -119,7 +119,7 @@ export class ProcessingHelper {
       ragManager.initializeEmbeddings({
           openaiKey: openaiKey || undefined,
           geminiKey: geminiKey || undefined,
-          // ollamaUrl is not fetched in CredentialsManager yet by default, but we pass these keys
+          ollamaUrl: process.env.OLLAMA_URL || 'http://localhost:11434',
       });
 
       // CRITICAL: Retry pending embeddings now that we have a key
